@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "JobTracker",
+  "version": "1.0.0",
+  "description": "Track your job applications across the web.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
