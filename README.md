@@ -1,6 +1,10 @@
 # Career Doc - AI Job Application Tracker
 
-A Chrome browser extension paired with a local Python backend designed to help you track job applications and process job details with AI directly from job boards.
+<p align="center">
+  <img src="extension/icons/icon128.png" alt="Career Doc Logo" width="128" height="128">
+</p>
+
+A Chrome extension and local Python backend designed to help you track job applications and process job details with AI directly from your browser.
 
 This project is built for local personal use. The Chrome extension extracts job information from web pages and sends it to a local FastAPI server, which processes the data using your custom AI API key.
 
