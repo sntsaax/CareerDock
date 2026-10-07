@@ -12,12 +12,28 @@ body {
     color: #222;
 }
 
-h1 {
+
+/* BRAND */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-icon {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.brand h1 {
     margin: 0;
     font-size: 20px;
     font-weight: 700;
     letter-spacing: -0.4px;
 }
+
 
 h2 {
     margin: 18px 0 9px;
@@ -27,26 +43,19 @@ h2 {
 }
 
 
-/* =========================
-   TRACK BUTTON
-   ========================= */
+/* TRACK BUTTON */
 
 #trackJob {
     width: 100%;
     margin-top: 11px;
     padding: 10px 12px;
-
     border: none;
     border-radius: 8px;
-
     background: #222;
     color: white;
-
     font-size: 13px;
     font-weight: 600;
-
     cursor: pointer;
-
     transition:
         transform 0.15s ease,
         opacity 0.15s ease;
@@ -66,9 +75,7 @@ h2 {
 }
 
 
-/* =========================
-   STATS
-   ========================= */
+/* STATS */
 
 #stats {
     display: grid;
@@ -79,11 +86,9 @@ h2 {
 
 .stat-card {
     padding: 7px 4px;
-
     background: white;
     border: 1px solid #e8e5ed;
     border-radius: 8px;
-
     text-align: center;
 }
 
@@ -102,9 +107,7 @@ h2 {
 }
 
 
-/* =========================
-   SEARCH + FILTER
-   ========================= */
+/* SEARCH + FILTER */
 
 #filters {
     display: flex;
@@ -115,14 +118,10 @@ h2 {
 #searchJobs {
     flex: 1;
     min-width: 0;
-
     padding: 8px 10px;
-
     border: 1px solid #ddd9e3;
     border-radius: 7px;
-
     background: white;
-
     font-size: 12px;
     outline: none;
 }
@@ -133,22 +132,16 @@ h2 {
 
 #statusFilter {
     width: 105px;
-
     padding: 8px;
-
     border: 1px solid #ddd9e3;
     border-radius: 7px;
-
     background: white;
-
     font-size: 11px;
     outline: none;
 }
 
 
-/* =========================
-   JOB LIST
-   ========================= */
+/* JOB LIST */
 
 #jobList {
     max-height: 365px;
@@ -170,21 +163,15 @@ h2 {
 }
 
 
-/* =========================
-   JOB CARD
-   ========================= */
+/* JOB CARD */
 
 .job {
     position: relative;
-
     padding: 10px;
     margin-bottom: 7px;
-
     background: white;
-
     border: 1px solid #e7e3eb;
     border-radius: 9px;
-
     transition:
         border-color 0.15s ease,
         box-shadow 0.15s ease;
@@ -197,7 +184,6 @@ h2 {
 
 .job-title {
     margin-bottom: 4px;
-
     font-size: 13px;
     font-weight: 700;
     line-height: 17px;
@@ -206,58 +192,44 @@ h2 {
 .company,
 .location {
     margin-top: 3px;
-
     font-size: 11px;
     color: #666;
-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 
-/* =========================
-   META
-   ========================= */
+/* META */
 
 .job-meta {
     display: flex;
     align-items: center;
     gap: 5px;
-
     margin-top: 6px;
-
     font-size: 9px;
     color: #999;
 }
 
 
-/* =========================
-   ACTIONS
-   ========================= */
+/* ACTIONS */
 
 .job-actions {
     display: flex;
     align-items: center;
     gap: 5px;
-
     margin-top: 7px;
 }
 
 
-/* =========================
-   STATUS
-   ========================= */
+/* STATUS */
 
 .status {
     padding: 5px 8px;
-
     border: none;
     border-radius: 999px;
-
     font-size: 10px;
     font-weight: 600;
-
     cursor: pointer;
     outline: none;
 }
@@ -293,24 +265,16 @@ h2 {
 }
 
 
-/* =========================
-   OPEN JOB
-   ========================= */
+/* OPEN JOB */
 
 .open-job {
     display: inline-block;
-
     padding: 5px 8px;
-
     border-radius: 6px;
-
     background: #f1eff5;
-
     color: #444;
-
     font-size: 10px;
     font-weight: 600;
-
     text-decoration: none;
 }
 
@@ -319,13 +283,10 @@ h2 {
 }
 
 
-/* =========================
-   MORE DETAILS
-   ========================= */
+/* MORE DETAILS */
 
 .more-details {
     margin-top: 7px;
-
     border-top: 1px solid #f0edf2;
     padding-top: 6px;
 }
@@ -333,13 +294,9 @@ h2 {
 .details-toggle {
     border: none;
     padding: 0;
-
     background: none;
-
     color: #888;
-
     font-size: 10px;
-
     cursor: pointer;
 }
 
@@ -348,9 +305,7 @@ h2 {
 }
 
 
-/* =========================
-   DETAILS CONTENT
-   ========================= */
+/* DETAILS CONTENT */
 
 .details-content {
     display: none;
@@ -361,57 +316,41 @@ h2 {
 }
 
 
-/* =========================
-   APPLICATION DATE
-   ========================= */
+/* APPLICATION DATE */
 
 .application-date {
     display: flex;
     align-items: center;
     gap: 5px;
-
     margin-top: 8px;
-
     font-size: 10px;
     color: #777;
 }
 
 .application-date input {
     width: 105px;
-
     padding: 4px 6px;
-
     border: 1px solid #e1dde5;
     border-radius: 5px;
-
     background: #faf9fb;
-
     font-size: 10px;
     color: #555;
 }
 
 
-/* =========================
-   NOTES
-   ========================= */
+/* NOTES */
 
 .notes {
     display: block;
-
     width: 100%;
     min-height: 40px;
-
     margin-top: 8px;
     padding: 7px 8px;
-
     border: 1px solid #e1dde5;
     border-radius: 6px;
-
     background: #faf9fb;
-
     font-family: Arial, sans-serif;
     font-size: 10px;
-
     resize: vertical;
     outline: none;
 }
@@ -421,24 +360,16 @@ h2 {
 }
 
 
-/* =========================
-   DELETE
-   ========================= */
+/* DELETE */
 
 .delete {
     margin-top: 7px;
-
     padding: 4px 7px;
-
     border: none;
     border-radius: 6px;
-
     background: #f7eeee;
-
     color: #a34d4d;
-
     font-size: 9px;
-
     cursor: pointer;
 }
 
@@ -447,16 +378,11 @@ h2 {
 }
 
 
-/* =========================
-   EMPTY STATE
-   ========================= */
+/* EMPTY STATE */
 
 .empty-message {
     padding: 28px 12px;
-
     text-align: center;
-
     color: #999;
-
     font-size: 11px;
 }
