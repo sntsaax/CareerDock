@@ -47,7 +47,6 @@ trackButton.addEventListener("click", async () => {
 async function loadJobs() {
 
     const result = await chrome.storage.local.get("jobs");
-
     const jobs = result.jobs || [];
 
     jobList.innerHTML = "";
@@ -55,25 +54,32 @@ async function loadJobs() {
     jobs.forEach((job, index) => {
 
         const jobElement = document.createElement("div");
-
         jobElement.className = "job";
 
         jobElement.innerHTML = `
             <div class="job-title">
-                ${job.title}
+                ${escapeHtml(job.title)}
             </div>
 
             <div class="company">
-                ${job.company}
+                🏢 ${escapeHtml(job.company)}
             </div>
-            
+
             <div class="location">
-                ${job.location}
+                📍 ${escapeHtml(job.location)}
             </div>
-            
-            <small>
-                ${job.date}
-            </small>
+
+            <div class="job-date">
+                Added: ${escapeHtml(job.date)}
+            </div>
+
+            <a 
+                href="${escapeHtml(job.url)}"
+                target="_blank"
+                class="open-job"
+            >
+                Open job
+            </a>
 
             <button class="delete" data-index="${index}">
                 Delete
@@ -82,6 +88,35 @@ async function loadJobs() {
 
         jobList.appendChild(jobElement);
     });
+
+
+    document.querySelectorAll(".delete").forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+            const index = button.dataset.index;
+
+            jobs.splice(index, 1);
+
+            await chrome.storage.local.set({
+                jobs: jobs
+            });
+
+            loadJobs();
+        });
+
+    });
+}
+
+
+function escapeHtml(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
 
 
     // Delete buttons
@@ -101,4 +136,3 @@ async function loadJobs() {
         });
 
     });
-}
