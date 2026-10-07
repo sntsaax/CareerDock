@@ -1,0 +1,48 @@
+body {
+    width: 350px;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#trackJob {
+    background: #222;
+    color: white;
+}
+
+#jobList {
+    margin-top: 15px;
+}
+
+.job {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.job-title {
+    font-weight: bold;
+}
+
+.company {
+    color: #666;
+    margin-top: 4px;
+}
+
+.delete {
+    margin-top: 8px;
+    background: #eee;
+}
