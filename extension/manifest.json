@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "JobTracker",
-  "version": "1.4",
+  "name": "CareerDock",
+  "version": "1.5",
   "description": "Track your job applications across the web.",
   "permissions": [
     "storage",
@@ -11,7 +11,19 @@
     "http://127.0.0.1:8000/*"
   ],
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "content_scripts": [
     {
