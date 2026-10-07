@@ -30,8 +30,11 @@ def home():
 
 @app.post("/extract-job")
 def extract_job(page: JobPage):
+
     return {
         "title": page.title,
-        "url": page.url,
-        "content_length": len(page.content)
+        "company": "Unknown",
+        "location": "Unknown",
+        "employment_type": "Unknown",
+        "url": page.url
     }

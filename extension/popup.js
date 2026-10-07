@@ -51,10 +51,11 @@ trackButton.addEventListener("click", async () => {
 
 
         alert(
-            `FastAPI received the page!\n\n` +
-            `Title: ${extractedJob.title}\n` +
-            `URL: ${extractedJob.url}\n` +
-            `Characters: ${extractedJob.content_length}`
+        `FastAPI received the page!\n\n` +
+        `Title: ${extractedJob.title}\n` +
+        `URL: ${extractedJob.url}\n\n` +
+        `First lines:\n` +
+        extractedJob.content_preview.join("\n")
         );
 
     } catch (error) {
