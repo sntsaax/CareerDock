@@ -1,8 +1,18 @@
 const trackButton = document.getElementById("trackJob");
 const jobList = document.getElementById("jobList");
+const searchInput = document.getElementById("searchJobs");
 
-// Load saved jobs when the extension opens
+
+// Load saved jobs
 loadJobs();
+
+
+// Search jobs
+if (searchInput) {
+    searchInput.addEventListener("input", () => {
+        loadJobs(searchInput.value);
+    });
+}
 
 
 // Track a new job
@@ -57,13 +67,19 @@ trackButton.addEventListener("click", async () => {
             employment_type: extractedJob.employment_type,
             url: extractedJob.url,
             status: "Saved",
-            notes: "",
-            date: new Date().toLocaleDateString()
+            date: new Date().toISOString(),
+            notes: ""
         };
 
         const result = await chrome.storage.local.get("jobs");
 
         const jobs = result.jobs || [];
+
+            jobs.sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            jobList.innerHTML = "";
 
         const alreadyTracked = jobs.some(job => job.url === newJob.url);
 
@@ -93,16 +109,31 @@ trackButton.addEventListener("click", async () => {
 
 });
 
-async function loadJobs() {
+async function loadJobs(searchTerm = "") {
 
     const result = await chrome.storage.local.get("jobs");
 
     const jobs = result.jobs || [];
 
+    jobs.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+    });
+
+    const filteredJobs = jobs.filter(job => {
+
+        const search = searchTerm.toLowerCase();
+
+        return (
+            (job.title || "").toLowerCase().includes(search) ||
+            (job.company || "").toLowerCase().includes(search)
+        );
+
+    });
+
     jobList.innerHTML = "";
 
 
-    jobs.forEach((job, index) => {
+    filteredJobs.forEach((job, index) => {
 
         const jobElement = document.createElement("div");
 
@@ -123,11 +154,10 @@ async function loadJobs() {
             </div>
 
             <div class="job-date">
-                Added: ${escapeHtml(job.date || "")}
+                Added: ${job.date ? new Date(job.date).toLocaleDateString() : ""}
             </div>
 
             <select class="status" data-index="${index}">
-
                 <option value="Saved" ${job.status === "Saved" ? "selected" : ""}>
                     📝 Saved
                 </option>
@@ -151,9 +181,7 @@ async function loadJobs() {
                 <option value="Withdrawn" ${job.status === "Withdrawn" ? "selected" : ""}>
                     ⚫ Withdrawn
                 </option>
-
             </select>
-
 
             <a
                 href="${escapeHtml(job.url || "#")}"
@@ -163,22 +191,18 @@ async function loadJobs() {
                 Open job
             </a>
 
-
             <textarea
                 class="notes"
                 data-index="${index}"
                 placeholder="Add notes..."
             >${escapeHtml(job.notes || "")}</textarea>
 
-
             <button class="delete" data-index="${index}">
                 Delete
             </button>
         `;
 
-
         jobList.appendChild(jobElement);
-
     });
 
 
@@ -195,8 +219,7 @@ async function loadJobs() {
                 jobs: jobs
             });
 
-            loadJobs();
-
+            loadJobs(searchTerm);
         });
 
     });
@@ -233,8 +256,7 @@ async function loadJobs() {
                 jobs: jobs
             });
 
-            loadJobs();
-
+            loadJobs(searchTerm);
         });
 
     });

@@ -76,3 +76,14 @@ button {
     border: 1px solid #ddd;
     background: white;
 }
+
+#searchJobs {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+}
