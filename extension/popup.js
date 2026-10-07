@@ -57,12 +57,20 @@ trackButton.addEventListener("click", async () => {
             employment_type: extractedJob.employment_type,
             url: extractedJob.url,
             status: "Saved",
+            notes: "",
             date: new Date().toLocaleDateString()
         };
 
         const result = await chrome.storage.local.get("jobs");
 
         const jobs = result.jobs || [];
+
+        const alreadyTracked = jobs.some(job => job.url === newJob.url);
+
+        if (alreadyTracked) {
+            alert("This job is already tracked.");
+            return;
+        }
 
         jobs.push(newJob);
 
@@ -85,8 +93,6 @@ trackButton.addEventListener("click", async () => {
 
 });
 
-
-// Display saved jobs
 async function loadJobs() {
 
     const result = await chrome.storage.local.get("jobs");
@@ -121,6 +127,7 @@ async function loadJobs() {
             </div>
 
             <select class="status" data-index="${index}">
+
                 <option value="Saved" ${job.status === "Saved" ? "selected" : ""}>
                     📝 Saved
                 </option>
@@ -144,7 +151,9 @@ async function loadJobs() {
                 <option value="Withdrawn" ${job.status === "Withdrawn" ? "selected" : ""}>
                     ⚫ Withdrawn
                 </option>
+
             </select>
+
 
             <a
                 href="${escapeHtml(job.url || "#")}"
@@ -154,14 +163,83 @@ async function loadJobs() {
                 Open job
             </a>
 
+
+            <textarea
+                class="notes"
+                data-index="${index}"
+                placeholder="Add notes..."
+            >${escapeHtml(job.notes || "")}</textarea>
+
+
             <button class="delete" data-index="${index}">
                 Delete
             </button>
         `;
 
+
         jobList.appendChild(jobElement);
+
     });
 
+
+    // Handle status changes
+    document.querySelectorAll(".status").forEach(select => {
+
+        select.addEventListener("change", async () => {
+
+            const index = Number(select.dataset.index);
+
+            jobs[index].status = select.value;
+
+            await chrome.storage.local.set({
+                jobs: jobs
+            });
+
+            loadJobs();
+
+        });
+
+    });
+
+
+    // Handle notes
+    document.querySelectorAll(".notes").forEach(textarea => {
+
+        textarea.addEventListener("change", async () => {
+
+            const index = Number(textarea.dataset.index);
+
+            jobs[index].notes = textarea.value;
+
+            await chrome.storage.local.set({
+                jobs: jobs
+            });
+
+        });
+
+    });
+
+
+    // Handle delete buttons
+    document.querySelectorAll(".delete").forEach(button => {
+
+        button.addEventListener("click", async () => {
+
+            const index = Number(button.dataset.index);
+
+            jobs.splice(index, 1);
+
+            await chrome.storage.local.set({
+                jobs: jobs
+            });
+
+            loadJobs();
+
+        });
+
+    });
+
+}
 
     // Handle status changes
     document.querySelectorAll(".status").forEach(select => {
@@ -199,8 +277,6 @@ async function loadJobs() {
         });
 
     });
-
-}
 
 
 // Prevent webpage HTML from being inserted into our extension
