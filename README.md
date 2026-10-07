@@ -8,6 +8,12 @@ A Chrome extension and local Python backend designed to help you track job appli
 
 This project is built for local personal use. The Chrome extension extracts job information from web pages and sends it to a local FastAPI server, which processes the data using your custom AI API key.
 
+<p align="center">
+  <video src="CareerDock_demo2.mp4" controls width="100%" style="max-width: 700px;">
+    Your browser does not support the video tag.
+  </video>
+</p>
+
 ---
 
 ## Key Features
