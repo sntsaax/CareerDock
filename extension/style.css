@@ -46,3 +46,8 @@ button {
     margin-top: 8px;
     background: #eee;
 }
+
+.location {
+    color: #666;
+    margin-top: 4px;
+}

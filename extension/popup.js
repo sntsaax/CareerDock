@@ -14,12 +14,20 @@ trackButton.addEventListener("click", async () => {
         currentWindow: true
     });
 
-    const job = {
-        title: tab.title,
-        company: "Unknown",
-        url: tab.url,
-        date: new Date().toLocaleDateString()
-    };
+    const jobInfo = await chrome.tabs.sendMessage(
+    tab.id,
+    {
+        type: "GET_JOB_INFO"
+    }
+);
+
+  const job = {
+      title: jobInfo.title,
+      company: jobInfo.company,
+      location: jobInfo.location,
+      url: tab.url,
+      date: new Date().toLocaleDateString()
+  };
 
     const result = await chrome.storage.local.get("jobs");
 
@@ -58,7 +66,11 @@ async function loadJobs() {
             <div class="company">
                 ${job.company}
             </div>
-
+            
+            <div class="location">
+                ${job.location}
+            </div>
+            
             <small>
                 ${job.date}
             </small>
