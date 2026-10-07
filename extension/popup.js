@@ -8,38 +8,64 @@ loadJobs();
 // Track a new job
 trackButton.addEventListener("click", async () => {
 
-    const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true
-    });
+    try {
 
-    const jobInfo = await chrome.tabs.sendMessage(
-        tab.id,
-        {
-            type: "GET_JOB_INFO"
+        const [tab] = await chrome.tabs.query({
+            active: true,
+            currentWindow: true
+        });
+
+        console.log("Current tab:", tab.url);
+
+
+        const pageData = await chrome.tabs.sendMessage(
+            tab.id,
+            {
+                type: "GET_PAGE_DATA"
+            }
+        );
+
+        console.log("Page data:", pageData);
+
+
+        const response = await fetch(
+            "http://127.0.0.1:8000/extract-job",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(pageData)
+            }
+        );
+
+
+        if (!response.ok) {
+            throw new Error(`FastAPI returned ${response.status}`);
         }
-    );
 
-    const job = {
-        title: jobInfo.title,
-        company: jobInfo.company,
-        location: jobInfo.location,
-        url: tab.url,
-        date: new Date().toLocaleDateString(),
-        status: "Saved"
-    };
 
-    const result = await chrome.storage.local.get("jobs");
+        const extractedJob = await response.json();
 
-    const jobs = result.jobs || [];
+        console.log("FastAPI response:", extractedJob);
 
-    jobs.push(job);
 
-    await chrome.storage.local.set({
-        jobs: jobs
-    });
+        alert(
+            `FastAPI received the page!\n\n` +
+            `Title: ${extractedJob.title}\n` +
+            `URL: ${extractedJob.url}\n` +
+            `Characters: ${extractedJob.content_length}`
+        );
 
-    loadJobs();
+    } catch (error) {
+
+        console.error("JobTracker error:", error);
+
+        alert(
+            `Something went wrong:\n\n${error.message}`
+        );
+    }
+
 });
 
 
@@ -52,11 +78,13 @@ async function loadJobs() {
 
     jobList.innerHTML = "";
 
+
     jobs.forEach((job, index) => {
 
         const jobElement = document.createElement("div");
 
         jobElement.className = "job";
+
 
         jobElement.innerHTML = `
             <div class="job-title">
