@@ -50,13 +50,29 @@ trackButton.addEventListener("click", async () => {
         console.log("FastAPI response:", extractedJob);
 
 
-        alert(
-        `FastAPI received the page!\n\n` +
-        `Title: ${extractedJob.title}\n` +
-        `URL: ${extractedJob.url}\n\n` +
-        `First lines:\n` +
-        extractedJob.content_preview.join("\n")
-        );
+        const newJob = {
+            title: extractedJob.title,
+            company: extractedJob.company,
+            location: extractedJob.location,
+            employment_type: extractedJob.employment_type,
+            url: extractedJob.url,
+            status: "Saved",
+            date: new Date().toLocaleDateString()
+        };
+
+        const result = await chrome.storage.local.get("jobs");
+
+        const jobs = result.jobs || [];
+
+        jobs.push(newJob);
+
+        await chrome.storage.local.set({
+            jobs: jobs
+        });
+
+        loadJobs();
+
+        alert("Job saved successfully! 🎉");
 
     } catch (error) {
 
