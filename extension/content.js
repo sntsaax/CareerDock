@@ -5,7 +5,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const pageData = {
             url: window.location.href,
             title: document.title,
-            content: document.body.innerText
+            content: document.body.innerText || ""
         };
 
         sendResponse(pageData);

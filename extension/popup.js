@@ -27,6 +27,10 @@ if (statusFilter) {
 // Track a new job
 trackButton.addEventListener("click", async () => {
 
+    trackButton.disabled = true;
+    trackButton.textContent = "⏳ Checking page...";
+
+
     try {
 
         const [tab] = await chrome.tabs.query({
@@ -41,6 +45,39 @@ trackButton.addEventListener("click", async () => {
                 type: "GET_PAGE_DATA"
             }
         );
+
+
+        // Check if this is a job posting
+        const checkResponse = await fetch(
+            "http://127.0.0.1:8000/check-job",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(pageData)
+            }
+        );
+
+
+        if (!checkResponse.ok) {
+            throw new Error("Job check failed");
+        }
+
+
+        const checkResult = await checkResponse.json();
+
+
+        if (!checkResult.is_job_posting) {
+
+            alert("This doesn't look like a job posting.");
+
+            return;
+        }
+
+
+        // Extract job information
+        trackButton.textContent = "⏳ Extracting job...";
 
 
         const response = await fetch(
@@ -71,6 +108,7 @@ trackButton.addEventListener("click", async () => {
             url: extractedJob.url,
             status: "Saved",
             date: new Date().toISOString(),
+            application_date: "",
             notes: ""
         };
 
@@ -80,13 +118,16 @@ trackButton.addEventListener("click", async () => {
         const jobs = result.jobs || [];
 
 
+        // Check for duplicates
         const alreadyTracked = jobs.some(
             job => job.url === newJob.url
         );
 
 
         if (alreadyTracked) {
+
             alert("This job is already tracked.");
+
             return;
         }
 
@@ -104,6 +145,7 @@ trackButton.addEventListener("click", async () => {
 
         alert("Job saved successfully! 🎉");
 
+
     } catch (error) {
 
         console.error(error);
@@ -111,6 +153,12 @@ trackButton.addEventListener("click", async () => {
         alert(
             "Could not track this job. Make sure the backend is running and reload the job page."
         );
+
+
+    } finally {
+
+        trackButton.disabled = false;
+        trackButton.textContent = "Track this job";
 
     }
 
@@ -211,6 +259,9 @@ async function loadJobs(searchTerm = "", selectedStatus = "All") {
         jobElement.className = "job";
 
 
+        const statusClass = getStatusClass(job.status);
+
+
         jobElement.innerHTML = `
             <div class="job-title">
                 ${escapeHtml(job.title || "Unknown job")}
@@ -224,59 +275,112 @@ async function loadJobs(searchTerm = "", selectedStatus = "All") {
                 📍 ${escapeHtml(job.location || "Unknown location")}
             </div>
 
-            <div class="job-date">
-                Added: ${job.date ? new Date(job.date).toLocaleDateString() : ""}
+            <div class="job-meta">
+
+                <span>
+                    Added ${job.date
+                        ? new Date(job.date).toLocaleDateString()
+                        : ""}
+                </span>
+
+                ${
+                    job.employment_type &&
+                    job.employment_type !== "Unknown"
+                        ? `<span>•</span>
+                           <span>${escapeHtml(job.employment_type)}</span>`
+                        : ""
+                }
+
             </div>
 
-            <select
-                class="status"
-                data-url="${escapeHtml(job.url || "")}"
-            >
-                <option value="Saved" ${job.status === "Saved" ? "selected" : ""}>
-                    📝 Saved
-                </option>
 
-                <option value="Applied" ${job.status === "Applied" ? "selected" : ""}>
-                    🟡 Applied
-                </option>
+            <div class="job-actions">
 
-                <option value="Interview" ${job.status === "Interview" ? "selected" : ""}>
-                    🔵 Interview
-                </option>
+                <select
+                    class="status ${statusClass}"
+                    data-url="${escapeHtml(job.url || "")}"
+                >
+                    <option value="Saved" ${job.status === "Saved" ? "selected" : ""}>
+                        📝 Saved
+                    </option>
 
-                <option value="Offer" ${job.status === "Offer" ? "selected" : ""}>
-                    🟢 Offer
-                </option>
+                    <option value="Applied" ${job.status === "Applied" ? "selected" : ""}>
+                        🟡 Applied
+                    </option>
 
-                <option value="Rejected" ${job.status === "Rejected" ? "selected" : ""}>
-                    🔴 Rejected
-                </option>
+                    <option value="Interview" ${job.status === "Interview" ? "selected" : ""}>
+                        🔵 Interview
+                    </option>
 
-                <option value="Withdrawn" ${job.status === "Withdrawn" ? "selected" : ""}>
-                    ⚫ Withdrawn
-                </option>
-            </select>
+                    <option value="Offer" ${job.status === "Offer" ? "selected" : ""}>
+                        🟢 Offer
+                    </option>
 
-            <a
-                href="${escapeHtml(job.url || "#")}"
-                target="_blank"
-                class="open-job"
-            >
-                Open job
-            </a>
+                    <option value="Rejected" ${job.status === "Rejected" ? "selected" : ""}>
+                        🔴 Rejected
+                    </option>
 
-            <textarea
-                class="notes"
-                data-url="${escapeHtml(job.url || "")}"
-                placeholder="Add notes..."
-            >${escapeHtml(job.notes || "")}</textarea>
+                    <option value="Withdrawn" ${job.status === "Withdrawn" ? "selected" : ""}>
+                        ⚫ Withdrawn
+                    </option>
 
-            <button
-                class="delete"
-                data-url="${escapeHtml(job.url || "")}"
-            >
-                Delete
-            </button>
+                </select>
+
+
+                <a
+                    href="${escapeHtml(job.url || "#")}"
+                    target="_blank"
+                    class="open-job"
+                >
+                    Open job
+                </a>
+
+            </div>
+
+
+            <div class="more-details">
+
+                <button
+                    class="details-toggle"
+                    data-url="${escapeHtml(job.url || "")}"
+                >
+                    ＋ More details
+                </button>
+
+
+                <div class="details-content">
+
+                    <div class="application-date">
+
+                        <span>Applied:</span>
+
+                        <input
+                            type="date"
+                            class="application-date-input"
+                            data-url="${escapeHtml(job.url || "")}"
+                            value="${escapeHtml(job.application_date || "")}"
+                        >
+
+                    </div>
+
+
+                    <textarea
+                        class="notes"
+                        data-url="${escapeHtml(job.url || "")}"
+                        placeholder="Add notes..."
+                    >${escapeHtml(job.notes || "")}</textarea>
+
+
+                    <button
+                        class="delete"
+                        data-url="${escapeHtml(job.url || "")}"
+                    >
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
         `;
 
 
@@ -303,12 +407,87 @@ async function loadJobs(searchTerm = "", selectedStatus = "All") {
             job.status = select.value;
 
 
+            // Automatically set application date
+            // when the user marks a job as Applied.
+            if (
+                select.value === "Applied" &&
+                !job.application_date
+            ) {
+
+                job.application_date =
+                    new Date().toISOString().split("T")[0];
+
+            }
+
+
             await chrome.storage.local.set({
                 jobs: jobs
             });
 
 
             loadJobs(searchInput.value, statusFilter.value);
+
+        });
+
+    });
+
+
+    // Handle details toggles
+    document.querySelectorAll(".details-toggle").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const details = button.nextElementSibling;
+
+            if (!details) {
+                return;
+            }
+
+
+            const isOpen =
+                details.classList.contains("open");
+
+
+            if (isOpen) {
+
+                details.classList.remove("open");
+
+                button.textContent = "＋ More details";
+
+            } else {
+
+                details.classList.add("open");
+
+                button.textContent = "− Hide details";
+
+            }
+
+        });
+
+    });
+
+
+    // Handle application dates
+    document.querySelectorAll(".application-date-input").forEach(input => {
+
+        input.addEventListener("change", async () => {
+
+            const url = input.dataset.url;
+
+            const job = jobs.find(job => job.url === url);
+
+
+            if (!job) {
+                return;
+            }
+
+
+            job.application_date = input.value;
+
+
+            await chrome.storage.local.set({
+                jobs: jobs
+            });
 
         });
 
@@ -365,6 +544,34 @@ async function loadJobs(searchTerm = "", selectedStatus = "All") {
         });
 
     });
+
+}
+
+
+// Get status CSS class
+function getStatusClass(status) {
+
+    switch (status) {
+
+        case "Applied":
+            return "status-applied";
+
+        case "Interview":
+            return "status-interview";
+
+        case "Offer":
+            return "status-offer";
+
+        case "Rejected":
+            return "status-rejected";
+
+        case "Withdrawn":
+            return "status-withdrawn";
+
+        default:
+            return "status-saved";
+
+    }
 
 }
 
