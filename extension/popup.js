@@ -1,6 +1,7 @@
 const trackButton = document.getElementById("trackJob");
 const jobList = document.getElementById("jobList");
 const searchInput = document.getElementById("searchJobs");
+const statusFilter = document.getElementById("statusFilter");
 
 
 // Load saved jobs
@@ -10,7 +11,15 @@ loadJobs();
 // Search jobs
 if (searchInput) {
     searchInput.addEventListener("input", () => {
-        loadJobs(searchInput.value);
+        loadJobs(searchInput.value, statusFilter.value);
+    });
+}
+
+
+// Filter jobs by status
+if (statusFilter) {
+    statusFilter.addEventListener("change", () => {
+        loadJobs(searchInput.value, statusFilter.value);
     });
 }
 
@@ -25,8 +34,6 @@ trackButton.addEventListener("click", async () => {
             currentWindow: true
         });
 
-        console.log("Current tab:", tab.url);
-
 
         const pageData = await chrome.tabs.sendMessage(
             tab.id,
@@ -34,8 +41,6 @@ trackButton.addEventListener("click", async () => {
                 type: "GET_PAGE_DATA"
             }
         );
-
-        console.log("Page data:", pageData);
 
 
         const response = await fetch(
@@ -51,13 +56,11 @@ trackButton.addEventListener("click", async () => {
 
 
         if (!response.ok) {
-            throw new Error(`FastAPI returned ${response.status}`);
+            throw new Error("Backend request failed");
         }
 
 
         const extractedJob = await response.json();
-
-        console.log("FastAPI response:", extractedJob);
 
 
         const newJob = {
@@ -71,69 +74,137 @@ trackButton.addEventListener("click", async () => {
             notes: ""
         };
 
+
         const result = await chrome.storage.local.get("jobs");
 
         const jobs = result.jobs || [];
 
-            jobs.sort((a, b) => {
-                return new Date(b.date) - new Date(a.date);
-            });
 
-            jobList.innerHTML = "";
+        const alreadyTracked = jobs.some(
+            job => job.url === newJob.url
+        );
 
-        const alreadyTracked = jobs.some(job => job.url === newJob.url);
 
         if (alreadyTracked) {
             alert("This job is already tracked.");
             return;
         }
 
+
         jobs.push(newJob);
+
 
         await chrome.storage.local.set({
             jobs: jobs
         });
 
-        loadJobs();
+
+        loadJobs(searchInput.value, statusFilter.value);
+
 
         alert("Job saved successfully! 🎉");
 
     } catch (error) {
 
-        console.error("JobTracker error:", error);
+        console.error(error);
 
         alert(
-            `Something went wrong:\n\n${error.message}`
+            "Could not track this job. Make sure the backend is running and reload the job page."
         );
+
     }
 
 });
 
-async function loadJobs(searchTerm = "") {
+
+// Load and display jobs
+async function loadJobs(searchTerm = "", selectedStatus = "All") {
 
     const result = await chrome.storage.local.get("jobs");
 
     const jobs = result.jobs || [];
 
+
+    // Sort newest first
     jobs.sort((a, b) => {
         return new Date(b.date) - new Date(a.date);
     });
 
+
+    // Update statistics
+    updateStats(jobs);
+
+
+    const search = searchTerm.toLowerCase();
+
+
+    // Filter jobs
     const filteredJobs = jobs.filter(job => {
 
-        const search = searchTerm.toLowerCase();
-
-        return (
+        const matchesSearch =
             (job.title || "").toLowerCase().includes(search) ||
-            (job.company || "").toLowerCase().includes(search)
-        );
+            (job.company || "").toLowerCase().includes(search);
+
+
+        const matchesStatus =
+            selectedStatus === "All" ||
+            job.status === selectedStatus;
+
+
+        return matchesSearch && matchesStatus;
 
     });
+
 
     jobList.innerHTML = "";
 
 
-    filteredJobs.forEach((job, index) => {
+    // Empty state
+    if (filteredJobs.length === 0) {
+
+        const emptyMessage = document.createElement("div");
+
+        emptyMessage.className = "empty-message";
+
+
+        let message = "No jobs found.";
+
+
+        if (selectedStatus === "Saved") {
+            message = "You haven't saved any jobs yet.";
+        }
+
+        if (selectedStatus === "Applied") {
+            message = "You haven't applied to any jobs yet.";
+        }
+
+        if (selectedStatus === "Interview") {
+            message = "You don't have any interviews yet.";
+        }
+
+        if (selectedStatus === "Offer") {
+            message = "You haven't received any offers yet.";
+        }
+
+        if (selectedStatus === "Rejected") {
+            message = "You don't have any rejected applications yet.";
+        }
+
+        if (selectedStatus === "Withdrawn") {
+            message = "You don't have any withdrawn applications yet.";
+        }
+
+
+        emptyMessage.textContent = message;
+
+        jobList.appendChild(emptyMessage);
+
+        return;
+    }
+
+
+    // Display jobs
+    filteredJobs.forEach(job => {
 
         const jobElement = document.createElement("div");
 
@@ -157,7 +228,10 @@ async function loadJobs(searchTerm = "") {
                 Added: ${job.date ? new Date(job.date).toLocaleDateString() : ""}
             </div>
 
-            <select class="status" data-index="${index}">
+            <select
+                class="status"
+                data-url="${escapeHtml(job.url || "")}"
+            >
                 <option value="Saved" ${job.status === "Saved" ? "selected" : ""}>
                     📝 Saved
                 </option>
@@ -193,16 +267,21 @@ async function loadJobs(searchTerm = "") {
 
             <textarea
                 class="notes"
-                data-index="${index}"
+                data-url="${escapeHtml(job.url || "")}"
                 placeholder="Add notes..."
             >${escapeHtml(job.notes || "")}</textarea>
 
-            <button class="delete" data-index="${index}">
+            <button
+                class="delete"
+                data-url="${escapeHtml(job.url || "")}"
+            >
                 Delete
             </button>
         `;
 
+
         jobList.appendChild(jobElement);
+
     });
 
 
@@ -211,15 +290,26 @@ async function loadJobs(searchTerm = "") {
 
         select.addEventListener("change", async () => {
 
-            const index = Number(select.dataset.index);
+            const url = select.dataset.url;
 
-            jobs[index].status = select.value;
+            const job = jobs.find(job => job.url === url);
+
+
+            if (!job) {
+                return;
+            }
+
+
+            job.status = select.value;
+
 
             await chrome.storage.local.set({
                 jobs: jobs
             });
 
-            loadJobs(searchTerm);
+
+            loadJobs(searchInput.value, statusFilter.value);
+
         });
 
     });
@@ -230,9 +320,18 @@ async function loadJobs(searchTerm = "") {
 
         textarea.addEventListener("change", async () => {
 
-            const index = Number(textarea.dataset.index);
+            const url = textarea.dataset.url;
 
-            jobs[index].notes = textarea.value;
+            const job = jobs.find(job => job.url === url);
+
+
+            if (!job) {
+                return;
+            }
+
+
+            job.notes = textarea.value;
+
 
             await chrome.storage.local.set({
                 jobs: jobs
@@ -248,65 +347,70 @@ async function loadJobs(searchTerm = "") {
 
         button.addEventListener("click", async () => {
 
-            const index = Number(button.dataset.index);
+            const url = button.dataset.url;
 
-            jobs.splice(index, 1);
+
+            const updatedJobs = jobs.filter(
+                job => job.url !== url
+            );
+
 
             await chrome.storage.local.set({
-                jobs: jobs
+                jobs: updatedJobs
             });
 
-            loadJobs(searchTerm);
+
+            loadJobs(searchInput.value, statusFilter.value);
+
         });
 
     });
 
 }
 
-    // Handle status changes
-    document.querySelectorAll(".status").forEach(select => {
 
-        select.addEventListener("change", async () => {
+// Update statistics
+function updateStats(jobs) {
 
-            const index = Number(select.dataset.index);
-
-            jobs[index].status = select.value;
-
-            await chrome.storage.local.set({
-                jobs: jobs
-            });
-
-            loadJobs();
-        });
-
-    });
+    const totalCount = document.getElementById("totalCount");
+    const appliedCount = document.getElementById("appliedCount");
+    const interviewCount = document.getElementById("interviewCount");
+    const offerCount = document.getElementById("offerCount");
 
 
-    // Handle delete buttons
-    document.querySelectorAll(".delete").forEach(button => {
-
-        button.addEventListener("click", async () => {
-
-            const index = Number(button.dataset.index);
-
-            jobs.splice(index, 1);
-
-            await chrome.storage.local.set({
-                jobs: jobs
-            });
-
-            loadJobs();
-        });
-
-    });
+    if (totalCount) {
+        totalCount.textContent = jobs.length;
+    }
 
 
-// Prevent webpage HTML from being inserted into our extension
-function escapeHtml(text) {
+    if (appliedCount) {
+        appliedCount.textContent =
+            jobs.filter(job => job.status === "Applied").length;
+    }
 
-    const div = document.createElement("div");
 
-    div.textContent = text;
+    if (interviewCount) {
+        interviewCount.textContent =
+            jobs.filter(job => job.status === "Interview").length;
+    }
 
-    return div.innerHTML;
+
+    if (offerCount) {
+        offerCount.textContent =
+            jobs.filter(job => job.status === "Offer").length;
+    }
+
+}
+
+
+// Escape HTML
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
 }

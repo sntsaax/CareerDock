@@ -17,15 +17,80 @@
         Track this job
     </button>
 
+
     <h2>My applications</h2>
 
-    <input
-        type="text"
-        id="searchJobs"
-        placeholder="Search jobs..."
-    >
+
+    <div id="stats">
+
+        <div class="stat-card">
+            <span class="stat-number" id="totalCount">0</span>
+            <span class="stat-label">Total</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number" id="appliedCount">0</span>
+            <span class="stat-label">Applied</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number" id="interviewCount">0</span>
+            <span class="stat-label">Interviews</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number" id="offerCount">0</span>
+            <span class="stat-label">Offers</span>
+        </div>
+
+    </div>
+
+
+    <div id="filters">
+
+        <input
+            type="text"
+            id="searchJobs"
+            placeholder="Search jobs..."
+        >
+
+        <select id="statusFilter">
+
+            <option value="All">
+                All statuses
+            </option>
+
+            <option value="Saved">
+                📝 Saved
+            </option>
+
+            <option value="Applied">
+                🟡 Applied
+            </option>
+
+            <option value="Interview">
+                🔵 Interview
+            </option>
+
+            <option value="Offer">
+                🟢 Offer
+            </option>
+
+            <option value="Rejected">
+                🔴 Rejected
+            </option>
+
+            <option value="Withdrawn">
+                ⚫ Withdrawn
+            </option>
+
+        </select>
+
+    </div>
+
 
     <div id="jobList"></div>
+
 
     <script src="popup.js"></script>
 

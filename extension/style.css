@@ -28,6 +28,60 @@ button {
     font-size: 14px;
 }
 
+#stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin: 10px 0 15px 0;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 8px 4px;
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.stat-label {
+    display: block;
+    margin-top: 3px;
+    font-size: 10px;
+    color: #777;
+}
+
+#filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+#searchJobs {
+    flex: 1;
+    width: auto;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    background: white;
+}
+
+#statusFilter {
+    width: 120px;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    font-size: 12px;
+}
+
 .job {
     background: white;
     border-radius: 8px;
@@ -74,16 +128,5 @@ button {
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #ddd;
-    background: white;
-}
-
-#searchJobs {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 9px 10px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 13px;
     background: white;
 }
