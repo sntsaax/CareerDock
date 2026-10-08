@@ -49,7 +49,7 @@ trackButton.addEventListener("click", async () => {
 
         // Check if this is a job posting
         const checkResponse = await fetch(
-            "http://127.0.0.1:8000/check-job",
+            "https://careerdock-0w61.onrender.com/check-job",
             {
                 method: "POST",
                 headers: {
@@ -81,7 +81,7 @@ trackButton.addEventListener("click", async () => {
 
 
         const response = await fetch(
-            "http://127.0.0.1:8000/extract-job",
+            "https://careerdock-0w61.onrender.com",
             {
                 method: "POST",
                 headers: {
