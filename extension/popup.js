@@ -81,7 +81,7 @@ trackButton.addEventListener("click", async () => {
 
 
         const response = await fetch(
-            "https://careerdock-0w61.onrender.com",
+            "https://careerdock-0w61.onrender.com/extract-job",
             {
                 method: "POST",
                 headers: {
